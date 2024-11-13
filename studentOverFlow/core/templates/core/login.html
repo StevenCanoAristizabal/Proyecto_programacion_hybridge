@@ -1,0 +1,41 @@
+{% extends 'core/base.html' %}
+
+{% block title %} Iniciar sesión | {% endblock %}
+
+{% block content %}
+
+<div class="p-5 lg:p-10 text-center">
+  <h1 class="text-3xl lg:text-6xl text-black">Iniciar sesion</h1>
+</div>
+
+<form action="." method="post" class="lg:w-1/4 px-4 mx-auto bg-[#DBDBDB] m-5 p-10 rounded-xl">
+  {% csrf_token %}
+
+  <div class="mb-5">
+    <label class="text-black">Usuario</label>
+    <input type="text" placeholder="Usuario" name="username" class="w-full mt-2 px-4 py-2 rounded-xl  ">
+  </div>
+
+  <div class="mb-5">
+    <label class="text-black">Contraseña</label>
+    <input type="password" placeholder="Contraseña" name="password" class="w-full mt-2 px-4 py-2 rounded-xl  ">
+  </div>
+
+  {% if form.errors %}
+  {% for field in form %}
+  {% for error in field.errors %}
+  <div class="mb-5 p-4 rounded-xl bg-red-300 text-black">
+    <p>{{ error | escape }}</p>
+  </div>
+  {% endfor %}
+  {% endfor %}
+  {% endif %}
+
+  <div class="items-center flex flex-col">
+    <button class="px-5 w-full py-3 rounded-xl text-black bg-[#FFC727] hover:bg-[#e6b323]">Iniciar sesión</button>
+    <hr class="border-t border-black w-1/2 mx-auto my-5">
+    <a href="/signup/" class="px-5 py-3 rounded-xl text-white bg-[#455a64] hover:bg-[#6c7b83] ">Crea una cuenta</a>
+  </div>
+
+</form>
+{% endblock %}

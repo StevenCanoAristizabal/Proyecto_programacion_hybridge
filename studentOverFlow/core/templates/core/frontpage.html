@@ -1,0 +1,22 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %} Welcome | {% endblock %}
+
+{% block content %}
+<div class="p-10 lg:p-20 flex items-center justify-between">
+  <div class="flex flex-col w-1/2 ms-10">
+    <h1 class="text-3xl lg:text-6xl text-black font-semibold">Chatea con tus compañeros,donde y cuando quieras con StudentOverflow.
+    </h1>
+    <p class="mt-8 text-lg">Excelente software que te permite chatear desde cualquier lugar y<br>en cualquier momento
+      sin interrupciones.</p>
+    <a href="/signup/"
+      class="flex items-center justify-center px-5 py-3 w-52 rounded-xl text-center mt-8 text-white bg-[#455a64] hover:bg-[#6c7b83]">
+      Start Chatting Now ->
+    </a>
+    <img class="w-2/3 mt-8" src="{% static 'core/images/image2.png' %}" alt="">
+  </div>
+  <img class="w-1/3 me-10" src="{% static 'core/images/image.png' %}" alt="">
+</div>
+
+{% endblock %}

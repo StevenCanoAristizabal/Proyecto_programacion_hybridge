@@ -1,0 +1,97 @@
+{% extends 'core/base.html' %}
+
+{% block title %} {{ room.name }} | {% endblock %}
+
+{% block content %}
+<div class="p-5 lg:p-10 text-center">
+  <h1 class="text-3xl lg:text-6xl text-black">{{ room.name }}</h1>
+</div>
+
+<div class="lg:w-2/3 mx-4 lg:mx-auto p-6 bg-gray-100 rounded-xl shadow-lg">
+  <div class="chat-messages space-y-4 p-4 bg-white rounded-xl overflow-y-auto h-80 mb-6" id="chat-messages">
+
+    {% for message in messages %}
+    <div class="p-4 rounded-xl {% if message.user == request.user %}bg-[#455a64] text-white text-right{% else %}bg-gray-200{% endif %}">
+      <p class="font-semibold">{% if message.user == request.user %}You{% else %}{{message.user.username}}{% endif %}</p>
+      <p>{{message.content}}</p>
+    </div>
+    {% endfor %}
+
+  </div>
+
+  <div class="mt-6">
+    <form action="." method="post" class="flex items-center bg-white p-4 rounded-xl shadow-inner">
+      {% csrf_token %}
+      <input type="text" name="content" id="chat-message-input" class="flex-1 mr-3 p-2 border border-gray-300 rounded-xl focus:outline-none focus:border-[#455a64]" placeholder="Write a message">
+      <button class="px-5 py-3 rounded-xl text-white bg-[#455a64] hover:bg-[#6c7b83]" id="chat-message-submit">Submit</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ room.slug|json_script:"json-roomname" }}
+{{request.user.username|json_script:"json-username"}}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const roomName = JSON.parse(document.getElementById('json-roomname').textContent);
+    const userName = JSON.parse(document.getElementById('json-username').textContent);
+    const chatSocket = new WebSocket(
+      'ws://'
+      + window.location.host
+      + '/ws/'
+      + roomName
+      + '/'
+    );
+
+    chatSocket.onmessage = function (e) {
+      console.log('onmessage');
+
+      const data = JSON.parse(e.data);
+
+      if (data.message) {
+
+        let html = '<div class="p-4 rounded-xl';
+        if (data.username === userName) {
+          html += ' bg-[#455a64] text-white text-right';
+        } else {
+          html += ' bg-gray-200';
+        }
+        html += '">';
+        html += '<p class="font-semibold">' + (data.username === userName ? 'You' : data.username) + '</p>';
+        html += '<p>' + data.message + '</p></div>';
+
+        document.querySelector('#chat-messages').innerHTML += html;
+        document.querySelector('#chat-messages').scrollTop = document.querySelector('#chat-messages').scrollHeight;
+
+      } else {
+        alert('The message was empty!');
+      }
+    };
+
+    chatSocket.onclose = function (e) {
+      console.log('onclose');
+    };
+
+    document.querySelector('#chat-message-submit').onclick = function (e) {
+      e.preventDefault(); // Previene el comportamiento predeterminado del formulario
+
+      // Selecciona el elemento de entrada y obtiene su valor
+      const messageInputDom = document.querySelector('#chat-message-input');
+      const message = messageInputDom.value;
+
+      // Envía el mensaje a través del socket
+      chatSocket.send(JSON.stringify({
+        'message': message,
+        'username': userName,
+        'room': roomName
+      }));
+
+      // Limpia el campo de entrada del mensaje
+      messageInputDom.value = '';
+
+      return false; // Asegura que el formulario no se envíe
+    }
+  });
+</script>
+{% endblock %}
